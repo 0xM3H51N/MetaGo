@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="MetaGo Logo" width="200"/>
+</p>
+
 # MetaGo · 🧰📁
 
 [![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://golang.org)
