@@ -13,7 +13,7 @@ import (
 	"github.com/0xM3H51N/MetaGo/internal/core"
 )
 
-const Version = "MetaGo v1.0.0"
+const Version = "MetaGo v0.9.0"
 
 func fileFilter(f any) bool {
 	switch v := f.(type) {
@@ -143,7 +143,7 @@ func Run(cfg core.Config) error {
 		}
 		wg.Wait()
 	} else {
-		return fmt.Errorf("no input provided : use -f <file> or -d <dir> or --help for help")
+		return fmt.Errorf("no input provided : use --help for help")
 	}
 	return nil
 }
