@@ -7,6 +7,7 @@
 [![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://golang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![Version](https://img.shields.io/badge/version-v0.9.0-yellowgreen)]()
 
 A minimal, concurrent CLI tool to extract file metadata and hashes (SHA256/MD5) from files or directories.
 
@@ -54,10 +55,12 @@ metago --file /path/to/file --json
 
 | Flag       | Description                         | Default  |
 |------------|-------------------------------------|----------|
-| `--file`   | Path to a single file               |          |
-| `--dir`    | Path to a directory                 |          |
+| `-f`       | Path to a single file               |          |
+| `-d`       | Path to a directory                 |          |
 | `--json`   | Output in JSON format               | `false`  |
-| `--hash`   | Hashing algorithm (md5 or sha256)   | `sha256` |
+| `-h`       | Hashing algorithm (md5 or sha256)   | `sha256` |
+| `-r`       | Recursively scan subdirectories     | `false`  |
+| `-v`       | Recursively scan subdirectories     | `false`  |
 
 > Only one of `--file` or `--dir` can be used at a time.
 
@@ -71,6 +74,16 @@ Size: 1.2 MB
 Hash: 98af71c...
 ModTime: 2025-07-20 13:12:01 +0100
 ```
+
+---
+
+```json
+{
+  "Name": "report.pdf",
+  "Size": 1253171,
+  "Hash": "98af71c...",
+  "ModTime": "2025-07-20T13:12:01+01:00"
+}
 
 ---
 
@@ -88,14 +101,29 @@ MetaGo/
 
 ---
 
-## 🛠️ TODO
+## ✅ Completed Features
 
-- ✅ Metadata extraction
-- ✅ File hashing
-- ✅ JSON output
-- [ ] Recursive directory walk
-- [ ] File type detection
-- [ ] Unit tests
+- Metadata extraction
+- File hashing (SHA256 / MD5)
+- JSON output
+- Recursive directory walk
+- Concurrent processing with goroutines
+
+---
+
+## 🧪 Coming Soon
+- Final testing and verification
+- File type detection
+- Unit tests
+
+---
+
+## 🔖 Versioning
+
+This project uses [Semantic Versioning](https://semver.org/).  
+You are currently viewing **v0.9.0**, a feature-complete pre-release candidate pending final testing and verification.  
+
+Once fully tested and verified, MetaGo will reach **v1.0.0**, the first stable release.
 
 ---
 

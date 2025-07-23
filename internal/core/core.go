@@ -1,7 +1,5 @@
 package core
 
-type FileLike interface{}
-
 type FileMeta struct {
 	Name    string
 	Size    int64
@@ -10,8 +8,9 @@ type FileMeta struct {
 }
 
 type Config struct {
-	FilePath string
-	DirPath  string
-	Json     bool
-	HashType string
+	FilePath  string
+	DirPath   string
+	Json      bool
+	HashType  string
+	Recursive bool
 }

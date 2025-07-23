@@ -10,24 +10,18 @@ import (
 func GetFileHash(data []byte, hashtype string) (string, error) {
 
 	switch strings.ToLower(hashtype) {
-	case "md5":
+	case "":
 		h := md5.New()
-		_, err := h.Write(data)
-		if err != nil {
-			return "", err
-		}
+		h.Write(data)
 		hashBytes := h.Sum(nil)
 		hashstring := hex.EncodeToString(hashBytes)
 		return hashstring, nil
 
 	default:
 		h := sha256.New()
-		_, err := h.Write(data)
-		if err != nil {
-			return "", err
-		}
+		h.Write(data)
 		hashBytes := h.Sum(nil)
-		hashstring := hex.EncodeToString(hashBytes[:])
+		hashstring := hex.EncodeToString(hashBytes)
 
 		return hashstring, nil
 	}

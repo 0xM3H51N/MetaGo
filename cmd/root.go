@@ -13,7 +13,9 @@ import (
 	"github.com/0xM3H51N/MetaGo/internal/core"
 )
 
-func fileFilter(f core.FileLike) bool {
+const Version = "MetaGo v1.0.0"
+
+func fileFilter(f any) bool {
 	switch v := f.(type) {
 	case os.DirEntry:
 		info, err := v.Info()
@@ -55,55 +57,82 @@ func getFileMeta(file string, hashtype string) (core.FileMeta, error) {
 	return fileMeta, nil
 }
 
-func collectDirFiles(dir string) ([]string, error) {
+func collectDirFiles(dir string) ([]string, []string, error) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("could not read directory")
+		return nil, nil, fmt.Errorf("could not read directory %q: %w", dir, err)
 	}
 
 	var filesList []string
-	for _, file := range files {
-		if fileFilter(file) {
-			filesList = append(filesList, filepath.Join(dir, file.Name()))
+	var dirList []string
+
+	for _, f := range files {
+		if f.IsDir() {
+			dirList = append(dirList, filepath.Join(dir, f.Name()))
+			continue
 		}
+		if fileFilter(f) {
+			filesList = append(filesList, filepath.Join(dir, f.Name()))
+		}
+
 	}
 
-	return filesList, nil
+	return filesList, dirList, nil
 }
 
 func jsonOutput(meta core.FileMeta) {
-	json.NewEncoder(os.Stdout).Encode(meta)
+	if err := json.NewEncoder(os.Stdout).Encode(meta); err != nil {
+		log.Printf("json encode error: %v", err)
+	}
 }
 
 func output(meta core.FileMeta) {
 	fmt.Printf("Name: %s\nSize: %d\nHash: %s\nModTime: %s\n===============\n", meta.Name, meta.Size, meta.Hash, meta.ModTime)
 }
 
-func Run(cfg core.Config) {
+func Run(cfg core.Config) error {
+	if cfg.FilePath != "" && cfg.DirPath != "" {
+		return fmt.Errorf("please provide either -f or -d, not both")
+	}
 	if cfg.FilePath != "" {
 		meta, err := getFileMeta(cfg.FilePath, cfg.HashType)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if cfg.Json {
 			jsonOutput(meta)
-			return
+			return nil
 		}
 		output(meta)
-		return
+		return nil
 	} else if cfg.DirPath != "" {
-		filesList, err := collectDirFiles(cfg.DirPath)
+		filesList, dirList, err := collectDirFiles(cfg.DirPath)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		var wg sync.WaitGroup
+		if cfg.Recursive {
+			for _, dir := range dirList {
+				childCfg := cfg
+				childCfg.DirPath = dir
+				childCfg.FilePath = ""
+				wg.Add(1)
+				go func(c core.Config) {
+					defer wg.Done()
+					if err := Run(c); err != nil {
+						log.Printf("error scanning %s: %v", c.DirPath, err)
+					}
+				}(childCfg)
+			}
+		}
+
 		for _, file := range filesList {
 			wg.Add(1)
 			go func(f string, h string) {
 				defer wg.Done()
 				meta, err := getFileMeta(f, h)
 				if err != nil {
-					log.Print("could not get file meta %w", err)
+					log.Printf("could not get file meta: %v", err)
 				}
 				if cfg.Json {
 					jsonOutput(meta)
@@ -114,19 +143,27 @@ func Run(cfg core.Config) {
 		}
 		wg.Wait()
 	} else {
-		log.Fatal("Please provide path to file check --help")
+		return fmt.Errorf("no input provided : use -f <file> or -d <dir> or --help for help")
 	}
+	return nil
 }
 
 func parseFlags() core.Config {
-	filePath := flag.String("file", "", "Path to the file to analyze")
-	dirPath := flag.String("dir", "", "Path to a directory containing files to analyze")
+	filePath := flag.String("f", "", "Path to the file to analyze")
+	dirPath := flag.String("d", "", "Path to a directory containing files to analyze")
 	jsonOutput := flag.Bool("json", false, "Output as JSON")
-	hashType := flag.String("hash", "SHA256", "Choose hash type (MD5, SHA256)")
+	hashType := flag.String("h", "SHA256", "Choose hash type (MD5, SHA256)")
+	recursive := flag.Bool("r", false, "scanning entire folders")
+	version := flag.Bool("v", false, "Print version and exit")
 
 	flag.Parse()
 
-	config := core.Config{FilePath: *filePath, DirPath: *dirPath, Json: *jsonOutput, HashType: *hashType}
+	if *version {
+		fmt.Println(Version)
+		os.Exit(0)
+	}
+
+	config := core.Config{FilePath: *filePath, DirPath: *dirPath, Json: *jsonOutput, HashType: *hashType, Recursive: *recursive}
 
 	return config
 }
@@ -134,5 +171,8 @@ func parseFlags() core.Config {
 func Execute() {
 
 	cfg := parseFlags()
-	Run(cfg)
+	err := Run(cfg)
+	if err != nil {
+		log.Fatalf("error: %v\n", err)
+	}
 }
