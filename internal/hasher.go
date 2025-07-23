@@ -10,7 +10,7 @@ import (
 func GetFileHash(data []byte, hashtype string) (string, error) {
 
 	switch strings.ToLower(hashtype) {
-	case "":
+	case "md5":
 		h := md5.New()
 		h.Write(data)
 		hashBytes := h.Sum(nil)
