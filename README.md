@@ -4,9 +4,8 @@
 
 # MetaGo · 🧰📁
 
-[![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://golang.org)
+[![Go](https://img.shields.io/badge/Go-1.24.2-00ADD8?logo=go](https://golang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![Version](https://img.shields.io/badge/version-v0.9.0-yellowgreen)]()
 
 A minimal, concurrent CLI tool to extract file metadata and hashes (SHA256/MD5) from files or directories.
